@@ -16,19 +16,39 @@ int main(void)
 
 	logger = iniciar_logger();
 
-	// Usando el logger creado previamente
-	// Escribi: "Hola! Soy un log"
-
-
+	log_info (logger, "Hola! Soy un log");
+	
 	/* ---------------- ARCHIVOS DE CONFIGURACION ---------------- */
 
 	config = iniciar_config();
 
-	// Usando el config creado previamente, leemos los valores del config y los 
-	// dejamos en las variables 'ip', 'puerto' y 'valor'
+	if (config_has_property (config, "IP")){
+		ip = config_get_string_value (config, "IP");
+		log_info (logger, "La IP leída es: %s", ip);
+	} else {
+		perror("Error, el archivo no tiene la key IP");
+        abort();
+	}
 
-	// Loggeamos el valor de config
+	if (config_has_property (config, "Puerto")){
+		puerto = config_get_string_value (config, "Puerto");
+		log_info (logger, "El Puerto leído es: %s", puerto);
+	} else {
+		perror("Error, el archivo no tiene la key Puerto");
+        abort();
+	}
 
+	if (config_has_property (config, "Valor")){
+		valor = config_get_string_value (config, "Valor");
+		log_info (logger, "El Valor leído es: %s", valor);
+	} else {
+		perror("Error, el archivo no tiene la key Valor");
+        abort();
+	}
+
+	log_destroy (logger);
+	config_destroy (config);
+	return 0
 
 	/* ---------------- LEER DE CONSOLA ---------------- */
 
@@ -52,32 +72,34 @@ int main(void)
 	// Proximamente
 }
 
-t_log* iniciar_logger(void)
-{
-	t_log* nuevo_logger;
+t_log* iniciar_logger(void){
+	t_log* nuevo_logger = log_create ("tp0.log", "TP0", true, LOG_LEVEL_INFO);
 
+	if (nuevo_logger == NULL) {
+        perror("Error al crear el logger");
+        abort(); 
+    }
 	return nuevo_logger;
 }
 
-t_config* iniciar_config(void)
-{
-	t_config* nuevo_config;
-
+t_config* iniciar_config(void){
+	t_config* nuevo_config = config_create ("cliente.config");
+	if (nuevo_config == 0){
+		perror("¡No se pudo crear el config!");
+        abort(); 
+	}
 	return nuevo_config;
 }
 
-void leer_consola(t_log* logger)
-{
+void leer_consola(t_log* logger){
 	char* leido;
 
-	// La primera te la dejo de yapa
 	leido = readline("> ");
-
-	// El resto, las vamos leyendo y logueando hasta recibir un string vacío
-
-
-	// ¡No te olvides de liberar las lineas antes de regresar!
-
+	while(leido != NULL && strcmp(leido, "") != 0){
+		log_info (logger, ">> %s",leido);
+		free(leido);
+		leido = readline("> ");
+	}
 }
 
 void paquete(int conexion)
