@@ -46,10 +46,6 @@ int main(void)
         abort();
 	}
 
-	log_destroy (logger);
-	config_destroy (config);
-	return 0
-
 	/* ---------------- LEER DE CONSOLA ---------------- */
 
 	leer_consola(logger);
@@ -58,18 +54,21 @@ int main(void)
 
 	// ADVERTENCIA: Antes de continuar, tenemos que asegurarnos que el servidor esté corriendo para poder conectarnos a él
 
-	// Creamos una conexión hacia el servidor
+	// Creamos una conexión hacia el servidor*
 	conexion = crear_conexion(ip, puerto);
 
-	// Enviamos al servidor el valor de CLAVE como mensaje
+	// Enviamos al servidor el valor de CLAVE como mensaje ?
+	enviar_mensaje(valor, conexion);
 
 	// Armamos y enviamos el paquete
 	paquete(conexion);
 
 	terminar_programa(conexion, logger, config);
 
+	return 0
 	/*---------------------------------------------------PARTE 5-------------------------------------------------------------*/
 	// Proximamente
+	
 }
 
 t_log* iniciar_logger(void){
@@ -102,21 +101,31 @@ void leer_consola(t_log* logger){
 	}
 }
 
-void paquete(int conexion)
-{
-	// Ahora toca lo divertido!
+void paquete(int conexion){
 	char* leido;
 	t_paquete* paquete;
 
-	// Leemos y esta vez agregamos las lineas al paquete
+	// Leemos y esta vez agregamos las lineas al paquete*
+	paquete = crear_paquete();
 
+	leido = readline("> ");
+	while(leido != NULL && strcmp(leido, "") != 0){
+		agregar_a_paquete(paquete, leido, strlen(leido)+1);
+		free(leido);
+		leido = readline("> ");
+	}
 
-	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
-	
+	enviar_paquete(paquete, conexion);
+
+	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!*
+	free(leido);
+	eliminar_paquete(paquete);
 }
 
-void terminar_programa(int conexion, t_log* logger, t_config* config)
-{
+void terminar_programa(int conexion, t_log* logger, t_config* config){
 	/* Y por ultimo, hay que liberar lo que utilizamos (conexion, log y config) 
 	  con las funciones de las commons y del TP mencionadas en el enunciado */
+	log_destroy (logger);
+	config_destroy (config);
+	liberar_conexion(conexion);  
 }
